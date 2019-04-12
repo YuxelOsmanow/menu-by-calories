@@ -67,6 +67,74 @@ function get_daily_menu( $meal_ids, $total_calories ) {
 }
 
 /* ==========================================================================
+    #Creates Menu for given period of time
+========================================================================== */
+
+function get_menu_for_n_days_period( $period_by_days, $meal_ids, $total_calories ) {
+    if ( empty( $period_by_days ) ) {
+        return;
+    }
+
+    if ( empty( $meal_ids ) ) {
+        return;
+    }
+
+    $menu_items = array();
+
+    for ( $i = 0;  $i < $period_by_days;  $i++ ) {
+        $menu_items[ $i ] = get_daily_menu( $meal_ids, $total_calories );
+    }
+
+    if ( count( $menu_items ) > 1 ) {
+        $menu_items = remove_meal_duplicates( $menu_items, $meal_ids, $total_calories, 'breakfast' );
+        $menu_items = remove_meal_duplicates( $menu_items, $meal_ids, $total_calories, 'lunch' );
+    }
+
+    return $menu_items;
+}
+
+/* ==========================================================================
+    #Remove Meal Duplicates
+========================================================================== */
+
+function remove_meal_duplicates( $menu_items, $meal_ids, $total_calories, $meal_time ) {
+    foreach ( $menu_items as $current_key => $current_array ) {
+        foreach ( $menu_items as $search_key => $search_array ) {
+            if ( $search_array[ $meal_time ]->ID == $current_array[ $meal_time ]->ID ) {
+                if ( $search_key != $current_key ) {
+                    if ( ( $key = array_search( $current_array[ $meal_time ]->ID, $meal_ids ) ) !== false ) {
+                        unset( $meal_ids[ $key ] );
+                    }
+
+                    $duplicate_key = array_search( $current_array, $menu_items );
+                    $menu_items[ $duplicate_key ] = get_daily_menu( $meal_ids, $total_calories );
+                }
+            }
+        }
+
+        return $menu_items;
+    }
+}
+
+/* ==========================================================================
+    #Custom array pagination
+========================================================================== */
+
+function nxt_array_pagination( $array, $page, $limit ) {
+    $total = count( $array );
+    $totalPages = ceil( $total/ $limit );
+    $page = max( $page, 1 );
+    $page = min( $page, $totalPages );
+    $offset = ( $page - 1 ) * $limit;
+
+    if( $offset < 0 ) $offset = 0;
+
+    $array = array_slice( $array, $offset, $limit );
+
+    return $array;
+}
+
+/* ==========================================================================
     #Get the Breakfast and Lunch Meals
 ========================================================================== */
 
