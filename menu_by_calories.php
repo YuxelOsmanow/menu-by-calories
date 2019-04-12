@@ -4,24 +4,26 @@
     #Return Meals Array of by Criteria
 ========================================================================== */
 
-function get_meals_id_sorted( $protein_type, $vegs ) {
+function get_meals_id_sorted( $protein_type, $vegs = null ) {
     $meals_args = array(
         'post_type' => 'nxt_meal',
         'posts_per_page' => -1,
     );
 
-    if ( !empty( $protein_type ) ) {
-        $meta_query = array (
-            'meta_query' => array(
-                'relation' => 'AND',
-                array(
-                    'key' => 'nxt_protein_source',
-                    'value' => $protein_type,
-                    'compare' => 'IN',
-                ),
-            )
-        );
+    if ( empty( $protein_type ) ) {
+        return;
     }
+
+    $meta_query = array (
+        'meta_query' => array(
+            'relation' => 'AND',
+            array(
+                'key' => 'nxt_protein_source',
+                'value' => $protein_type,
+                'compare' => 'IN',
+            ),
+        )
+    );
 
     if ( !empty( $vegs ) ) {
         $vegs_query = array(
