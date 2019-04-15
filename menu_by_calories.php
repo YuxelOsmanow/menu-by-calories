@@ -4,7 +4,7 @@
     #Return Meals Array of by Criteria
 ========================================================================== */
 
-function get_meals_id_sorted( $protein_type, $vegs = null ) {
+function get_meals_id_by_criteria( $protein_type, $vegs = null ) {
     $meals_args = array(
         'post_type' => 'nxt_meal',
         'posts_per_page' => -1,
@@ -52,7 +52,6 @@ function get_meals_id_sorted( $protein_type, $vegs = null ) {
 ========================================================================== */
 
 function get_daily_menu( $meal_ids, $total_calories ) {
-
     if ( empty( $meal_ids ) ) {
         return __( 'Meals Array is Empty', 'nxt' );
     }
@@ -62,6 +61,11 @@ function get_daily_menu( $meal_ids, $total_calories ) {
     }
 
     $one_day_menu = get_the_breakfast_and_lunch( $meal_ids, $total_calories );
+
+    if ( is_string( $one_day_menu ) ) {
+        return $one_day_menu;
+    }
+
     $one_day_menu = get_the_dinner( $one_day_menu, $meal_ids, $one_day_menu[ 'remaining_calories' ], $total_calories );
     $one_day_menu[ 'brunch' ] = get_random_meal( $meal_ids, 'brunch', $one_day_menu[ 'after_dinner_remaining_calories' ] );
 
@@ -74,17 +78,17 @@ function get_daily_menu( $meal_ids, $total_calories ) {
 
 function get_menu_for_n_days_period( $period_by_days, $meal_ids, $total_calories ) {
     if ( empty( $period_by_days ) ) {
-        return;
-    }
-
-    if ( empty( $meal_ids ) ) {
-        return;
+        return __( 'Please provide the period', 'nxt' );
     }
 
     $menu_items = array();
 
     for ( $i = 0;  $i < $period_by_days;  $i++ ) {
         $menu_items[ $i ] = get_daily_menu( $meal_ids, $total_calories );
+
+        if ( is_string( $menu_items[ $i ] ) ) {
+            return $menu_items[ $i ];
+        }
     }
 
     if ( count( $menu_items ) > 1 ) {
@@ -100,6 +104,16 @@ function get_menu_for_n_days_period( $period_by_days, $meal_ids, $total_calories
 ========================================================================== */
 
 function remove_meal_duplicates( $menu_items, $meal_ids, $total_calories, $meal_time ) {
+    if ( empty( $meal_ids ) ) {
+        return __( 'Meals Array is Empty', 'nxt' );
+    }
+
+    print_r( $menu_items );exit;
+
+    if ( is_string( $menu_items ) ) {
+        return $menu_items;
+    }
+
     foreach ( $menu_items as $current_key => $current_array ) {
         foreach ( $menu_items as $search_key => $search_array ) {
             if ( $search_array[ $meal_time ]->ID == $current_array[ $meal_time ]->ID ) {
@@ -144,9 +158,22 @@ function get_the_breakfast_and_lunch( $meal_ids, $total_calories ) {
     $one_day_menu = array();
 
     $breakfast_meal = get_random_meal( $meal_ids, 'breakfast', $total_calories );
+
+    if ( empty( $breakfast_meal ) ) {
+        return __( 'No Breakfast /s Meal Found For Given Criteria', 'nxt' );
+    }
+
+    var_dump($breakfast_meal_calories);
+    exit;
     $breakfast_meal_calories = get_meal_calories( $breakfast_meal );
+
     $remaining_calories = recalculate_remaining_calories( $total_calories, $breakfast_meal );
     $lunch_meal = get_random_meal( $meal_ids, 'lunch', $remaining_calories );
+
+    if ( empty( $breakfast_meal ) ) {
+        return __( 'No Lunch /s Meal Found For Given Criteria', 'nxt' );
+    }
+
     $lunch_meal_calories = get_meal_calories( $lunch_meal );
 
     $max_dinner_calories = get_max_or_min_meal_time_calories( 'dinner' );
@@ -233,6 +260,9 @@ function get_random_meal( $meal_ids, $meal_time, $calories ) {
 ========================================================================== */
 
 function get_meal_calories( $meal ) {
+    var_dump($meal);
+    var_dump(empty( $meal ));
+    exit;
     if ( empty( $meal ) ) {
        return;
     }
@@ -248,7 +278,7 @@ function get_meal_calories( $meal ) {
 
 function recalculate_remaining_calories( $total_calories, $meal ) {
     if ( empty( $meal ) ) {
-       return;
+       return __( 'No Meal Provided', 'nxt' );
     }
 
     $meal_calories = get_meal_calories( $meal );
