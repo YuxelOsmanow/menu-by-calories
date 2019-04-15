@@ -108,8 +108,6 @@ function remove_meal_duplicates( $menu_items, $meal_ids, $total_calories, $meal_
         return __( 'Meals Array is Empty', 'nxt' );
     }
 
-    print_r( $menu_items );exit;
-
     if ( is_string( $menu_items ) ) {
         return $menu_items;
     }
@@ -163,8 +161,6 @@ function get_the_breakfast_and_lunch( $meal_ids, $total_calories ) {
         return __( 'No Breakfast /s Meal Found For Given Criteria', 'nxt' );
     }
 
-    var_dump($breakfast_meal_calories);
-    exit;
     $breakfast_meal_calories = get_meal_calories( $breakfast_meal );
 
     $remaining_calories = recalculate_remaining_calories( $total_calories, $breakfast_meal );
@@ -260,9 +256,6 @@ function get_random_meal( $meal_ids, $meal_time, $calories ) {
 ========================================================================== */
 
 function get_meal_calories( $meal ) {
-    var_dump($meal);
-    var_dump(empty( $meal ));
-    exit;
     if ( empty( $meal ) ) {
        return;
     }
